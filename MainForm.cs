@@ -190,16 +190,19 @@ namespace WindowsReplica
         delegate bool EnumWindowsProc(IntPtr hWnd, int lParam);
 
         [DllImport("user32")]
-        static extern IntPtr GetShellWindow();
+        static extern bool IsWindow(IntPtr hWnd);
+
+        [DllImport("user32")]
+        static extern bool IsImmersiveProcess(IntPtr hWnd);
 
         [DllImport("user32")]
         static extern bool IsWindowVisible(IntPtr hWnd);
 
         [DllImport("user32")]
-        static extern bool IsWindow(IntPtr hWnd);
+        static extern bool IsIconic(IntPtr hWnd);
 
         [DllImport("user32")]
-        static extern bool IsIconic(IntPtr hWnd);
+        static extern IntPtr GetShellWindow();
 
         [DllImport("user32")]
         static extern int GetWindowTextLength(IntPtr hWnd);
@@ -312,11 +315,14 @@ namespace WindowsReplica
         private bool EnumWindowCallback(IntPtr hWnd, int lParam)
         {
             //項目篩選
-            if (hWnd == GetShellWindow()) { return true; }
-            if (!IsWindowVisible(hWnd)) { return true; }
+            if (this.Handle == hWnd) { return true; }
             if (!IsWindow(hWnd)) { return true; }
+            if (IsImmersiveProcess(hWnd)) { return true; }
+            if (!IsWindowVisible(hWnd)) { return true; }
             if (IsIconic(hWnd)) { return true; }
+            if (hWnd == GetShellWindow()) { return true; }
             if (GetWindowTextLength(hWnd) == 0) { return true; }
+            
             //添加項目
             Icon gIcon = GetAppIcon(hWnd);
             StringBuilder sb = new StringBuilder(256);
@@ -326,6 +332,13 @@ namespace WindowsReplica
                 ToolStripMenuItem nItem = new ToolStripMenuItem();
                 nItem.Text = sb.ToString();
                 nItem.Image = gIcon.ToBitmap();
+                nItem.Tag = hWnd;
+                FormMenu.Items.Add(nItem);
+            }
+            else
+            {
+                ToolStripMenuItem nItem = new ToolStripMenuItem();
+                nItem.Text = sb.ToString();
                 nItem.Tag = hWnd;
                 FormMenu.Items.Add(nItem);
             }
