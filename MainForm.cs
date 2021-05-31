@@ -274,6 +274,38 @@ namespace WindowsReplica
             }
         }
 
+        //點擊穿透
+        private void ClickThrough()
+        {
+            if (Click_Through_Temp == false)
+            {
+                SetWindowLong(this.Handle, GWL_EXSTYLE, GetWindowLong(this.Handle, GWL_EXSTYLE) | WS_EX_LAYERED | WS_EX_TRANSPARENT);
+                Click_Through_Temp = true;
+                ToolStripMenuItem_Reset.Checked = true; //Taskbar
+            }
+            else
+            {
+                SetWindowLong(this.Handle, GWL_EXSTYLE, GetWindowLong(this.Handle, GWL_EXSTYLE) & ~WS_EX_LAYERED & ~WS_EX_TRANSPARENT);
+                Click_Through_Temp = false;
+                ToolStripMenuItem_Reset.Checked = false; //Taskbar
+            }
+        }
+
+        //置頂
+        private void ShowWindow()
+        {
+            if (this.TopMost == false)
+            {
+                this.TopMost = true;
+                this.WindowState = FormWindowState.Normal;
+                this.TopMost = false;
+            }
+            else
+            {
+                this.WindowState = FormWindowState.Normal;
+            }
+        }
+
         //取得工作區大小
         private static void GetScreenSize(out int Width,out int Height)
         {
@@ -371,6 +403,22 @@ namespace WindowsReplica
             }
         }
 
+        //重設
+        private void Reset()
+        {
+            if (Thumb != IntPtr.Zero)
+            {
+                DwmUnregisterThumbnail(Thumb);
+            }
+            ResizeForm = false;
+            GetScreenSize(out int ScreenWidth, out int ScreenHeight);
+            this.Size = new Size(ScreenWidth / 5, ScreenHeight / 5);
+            this.MinimumSize = new Size(ScreenWidth / 10, ScreenHeight / 10);
+            this.MaximumSize = new Size(ScreenWidth, ScreenHeight);
+        }
+
+
+
         #endregion
 
         #region 事件
@@ -408,7 +456,7 @@ namespace WindowsReplica
                 this.Cursor = Cursors.Default;
             }
         }
-                
+
         //視窗大小變更
         private void WindowsReplica_Resize(object sender, EventArgs e)
         {
@@ -421,16 +469,7 @@ namespace WindowsReplica
         {
             if (e.Button == MouseButtons.Left) 
             {
-                if (Click_Through_Temp == false)
-                {
-                    Click_Through_Temp = true;
-                    SetWindowLong(this.Handle, GWL_EXSTYLE, GetWindowLong(this.Handle, GWL_EXSTYLE) | WS_EX_LAYERED | WS_EX_TRANSPARENT);
-                }
-                else
-                {
-                    Click_Through_Temp = false;
-                    SetWindowLong(this.Handle, GWL_EXSTYLE, GetWindowLong(this.Handle, GWL_EXSTYLE) & ~WS_EX_LAYERED & ~WS_EX_TRANSPARENT);
-                }
+                ClickThrough();
             }
             GC.Collect();
         }
@@ -450,16 +489,11 @@ namespace WindowsReplica
                     break;
 
                 case "ToolStripMenuItem_Show": //顯示
-                    if (this.TopMost == false)
-                    {
-                        this.TopMost = true;
-                        this.WindowState = FormWindowState.Normal;
-                        this.TopMost = false;
-                    }
-                    else
-                    {
-                        this.WindowState = FormWindowState.Normal;
-                    }
+                    ShowWindow();
+                    break;
+
+                case "ToolStripMenuItem_Reset": //重設
+                    Reset();
                     break;
 
                 case "ToolStripMenuItem_OnTop": //置頂
@@ -498,15 +532,8 @@ namespace WindowsReplica
             }
             else if (e.ClickedItem.Text == "--None--")
             {
-                if(Thumb != IntPtr.Zero)
-                {
-                    ResizeForm = false;
-                    DwmUnregisterThumbnail(Thumb);
-                    GetScreenSize(out int ScreenWidth, out int ScreenHeight);
-                    this.Size = new Size(ScreenWidth / 5, ScreenHeight / 5);
-                    this.MinimumSize = new Size(ScreenWidth / 10, ScreenHeight / 10);
-                    this.MaximumSize = new Size(ScreenWidth, ScreenHeight);
-                }
+                Reset();
+                GC.Collect();
             }
             else
             {
