@@ -2,9 +2,9 @@
 
   WindowsReplica: [Download](https://github.com/m5687946568/WindowsReplica/blob/master/bin/Release/WindowsReplica.exe) 
 
-  SHA-1:	0e98a829eaa674df2218c3c77d324fb3e4e81a43
+  SHA-1:	0adb6a2757f761a1e0f9916ae0797564b8eff5a4
 
-  SHA-256:	5b7c8df51f043e17d9ccb8593c30c841eab4438172b14568870cd65913d5ad57
+  SHA-256:	93583e19b34881e6e6bfb2d9918e361c38634ce77c96b1f55e0cc739dcc5ba95
 
 
 ## How to use
