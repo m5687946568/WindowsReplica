@@ -47,22 +47,6 @@ namespace WindowsReplica
                             // Top or bottom handles, adjust width
                             rc.Right = rc.Left + (int)(OrininalWidth * h / OrininalHeight);
                             break;
-
-                        //case WMSZ_TOPLEFT:
-                        //case WMSZ_BOTTOMLEFT:
-                        //    // Top-left or bottom-left handles, adjust width
-                        //    rc.Left = rc.Right - (int)(OrininalWidth * h / OrininalHeight);
-                        //    break;
-
-                        //case WMSZ_TOPRIGHT:
-                        //    // Top-right handle, adjust height
-                        //    rc.Top = rc.Bottom - (int)(OrininalHeight * w / OrininalWidth);
-                        //    break;
-
-                        //case WMSZ_BOTTOMRIGHT:
-                        //    // Bottom-right handle, adjust height
-                        //    rc.Bottom = rc.Top + (int)(OrininalHeight * w / OrininalWidth);
-                        //    break;
                     }
                     Marshal.StructureToPtr(rc, m.LParam, true);
                 }
@@ -91,38 +75,24 @@ namespace WindowsReplica
         //WndProc功能
         const int WM_SIZING = 0x214;
         const int WM_NCLBUTTONDOWN = 0xA1; //游標位於視窗的非工作區內按下滑鼠左鍵
-        //static readonly int WM_NCRBUTTONDOWN = 0xA4;//游標位於視窗的非工作區內按下滑鼠右鍵
-        //static readonly int WM_NCHITTEST = 0x84; //傳送至視窗，以判斷視窗的哪個部分對應至特定的螢幕座標
-        //static readonly int HT_CLIENT = 1; //在視窗中
         const int HT_CAPTION = 2; //在標題列中
         const int HT_LEFT = 10; //在可調整大小之視窗的左框線中 
         const int HT_RIGHT = 11; //在可調整大小之視窗的右框線中 
         const int HT_TOP = 12; //在可調整大小之視窗的上框線中 
         const int HT_BOTTOM = 15; //在可調整大小之視窗的下框線中 
-        //const int HT_TOPLEFT = 13; //在可調整大小之視窗的左上框線中
-        //const int HT_TOPRIGHT = 14; //在可調整大小之視窗的右上框線中
-        //const int HT_BOTTOMLEFT = 16; //在可調整大小之視窗的左下框線中
-        //const int HT_BOTTOMRIGHT = 17; //在可調整大小之視窗的右下框線中
         const int WMSZ_LEFT = 1; //改變視窗左大小
         const int WMSZ_RIGHT = 2; //改變視窗右大小
         const int WMSZ_TOP = 3; //改變視窗頂部大小
         const int WMSZ_BOTTOM = 6; //改變視窗底部大小
-        //const int WMSZ_TOPLEFT = 4; //改變視窗左上大小
-        //const int WMSZ_TOPRIGHT = 5; //改變視窗右下大小
-        //const int WMSZ_BOTTOMLEFT = 7; //改變視窗左下大小
-        //const int WMSZ_BOTTOMRIGHT = 8; //改變視窗右下大小
+
 
         //鼠標位置
-        const int _ = 10; //邊距
+        const int _ = 4; //邊距
         Rectangle RectangleCentre { get { return new Rectangle(_, _, this.ClientSize.Width - _ - _, this.ClientSize.Height - _ - _); } }
         Rectangle RectangleTop { get { return new Rectangle(0, 0, this.ClientSize.Width, _); } }
         Rectangle RectangleLeft { get { return new Rectangle(0, 0, _, this.ClientSize.Height); } }
         Rectangle RectangleBottom { get { return new Rectangle(0, this.ClientSize.Height - _, this.ClientSize.Width, _); } }
         Rectangle RectangleRight { get { return new Rectangle(this.ClientSize.Width - _, 0, _, this.ClientSize.Height); } }
-        //Rectangle RectangleTopLeft { get { return new Rectangle(0, 0, _, _); } }
-        //Rectangle RectangleTopRight { get { return new Rectangle(this.ClientSize.Width - _, 0, _, _); } }
-        //Rectangle RectangleBottomLeft { get { return new Rectangle(0, this.ClientSize.Height - _, _, _); } }
-        //Rectangle RectangleBottomRight { get { return new Rectangle(this.ClientSize.Width - _, this.ClientSize.Height - _, _, _); } }
 
         //功能開關
         bool Click_Through_Temp = false;
@@ -380,16 +350,8 @@ namespace WindowsReplica
         //更新thumbnail屬性
         private void UpdateThumb()
         {
-            if(this.FormBorderStyle==FormBorderStyle.FixedToolWindow)
-            {
-                LeftAndTop = 0;
-                RightAndBottom = 0;
-            }
-            else
-            {
-                LeftAndTop = -4;
-                RightAndBottom = 4;
-            }
+            LeftAndTop = 1;
+            RightAndBottom = -1;
             if (Thumb != IntPtr.Zero)
             {
                 DWM_THUMBNAIL_PROPERTIES props = new DWM_THUMBNAIL_PROPERTIES
@@ -429,10 +391,6 @@ namespace WindowsReplica
             {
                 var cursor = this.PointToClient(Cursor.Position);
                 if (RectangleCentre.Contains(cursor)) { ReleaseCapture(); SendMessage(Handle, WM_NCLBUTTONDOWN, HT_CAPTION, 0); }
-                //else if (RectangleTopLeft.Contains(cursor)) { ReleaseCapture(); SendMessage(Handle, WM_NCLBUTTONDOWN, HT_TOPLEFT, 0); }
-                //else if (RectangleTopRight.Contains(cursor)) { ReleaseCapture(); SendMessage(Handle, WM_NCLBUTTONDOWN, HT_TOPRIGHT, 0); }
-                //else if (RectangleBottomLeft.Contains(cursor)) { ReleaseCapture(); SendMessage(Handle, WM_NCLBUTTONDOWN, HT_BOTTOMLEFT, 0); }
-                //else if (RectangleBottomRight.Contains(cursor)) { ReleaseCapture(); SendMessage(Handle, WM_NCLBUTTONDOWN, HT_BOTTOMRIGHT, 0); }
                 else if (RectangleTop.Contains(cursor)) { ReleaseCapture(); SendMessage(Handle, WM_NCLBUTTONDOWN, HT_TOP, 0); }
                 else if (RectangleLeft.Contains(cursor)) { ReleaseCapture(); SendMessage(Handle, WM_NCLBUTTONDOWN, HT_LEFT, 0); }
                 else if (RectangleRight.Contains(cursor)) { ReleaseCapture(); SendMessage(Handle, WM_NCLBUTTONDOWN, HT_RIGHT, 0); }

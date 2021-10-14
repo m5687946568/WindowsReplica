@@ -34,6 +34,7 @@ namespace WindowsReplica
             this.NotifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
             this.NotifyIconMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.ToolStripMenuItem_OnTop = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.ToolStripMenuItem_Reset = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.ToolStripMenuItem_Show = new System.Windows.Forms.ToolStripMenuItem();
@@ -42,7 +43,6 @@ namespace WindowsReplica
             this.ToolStripMenuItem_Exit = new System.Windows.Forms.ToolStripMenuItem();
             this.FormMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.NotifyIconMenu.SuspendLayout();
             this.FormMenu.SuspendLayout();
             this.SuspendLayout();
@@ -70,7 +70,7 @@ namespace WindowsReplica
             this.NotifyIconMenu.Name = "notifyIconmenu";
             this.NotifyIconMenu.ShowCheckMargin = true;
             this.NotifyIconMenu.ShowImageMargin = false;
-            this.NotifyIconMenu.Size = new System.Drawing.Size(181, 154);
+            this.NotifyIconMenu.Size = new System.Drawing.Size(135, 132);
             this.NotifyIconMenu.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.NotifyIconMenu_ItemClicked);
             // 
             // ToolStripMenuItem_OnTop
@@ -78,42 +78,47 @@ namespace WindowsReplica
             this.ToolStripMenuItem_OnTop.Checked = true;
             this.ToolStripMenuItem_OnTop.CheckState = System.Windows.Forms.CheckState.Checked;
             this.ToolStripMenuItem_OnTop.Name = "ToolStripMenuItem_OnTop";
-            this.ToolStripMenuItem_OnTop.Size = new System.Drawing.Size(180, 22);
+            this.ToolStripMenuItem_OnTop.Size = new System.Drawing.Size(134, 22);
             this.ToolStripMenuItem_OnTop.Text = "OnTop";
+            // 
+            // toolStripSeparator3
+            // 
+            this.toolStripSeparator3.Name = "toolStripSeparator3";
+            this.toolStripSeparator3.Size = new System.Drawing.Size(131, 6);
             // 
             // ToolStripMenuItem_Reset
             // 
             this.ToolStripMenuItem_Reset.Name = "ToolStripMenuItem_Reset";
-            this.ToolStripMenuItem_Reset.Size = new System.Drawing.Size(180, 22);
+            this.ToolStripMenuItem_Reset.Size = new System.Drawing.Size(134, 22);
             this.ToolStripMenuItem_Reset.Text = "Reset";
             // 
             // ToolStripSeparator2
             // 
             this.ToolStripSeparator2.Name = "ToolStripSeparator2";
-            this.ToolStripSeparator2.Size = new System.Drawing.Size(177, 6);
+            this.ToolStripSeparator2.Size = new System.Drawing.Size(131, 6);
             // 
             // ToolStripMenuItem_Show
             // 
             this.ToolStripMenuItem_Show.Name = "ToolStripMenuItem_Show";
-            this.ToolStripMenuItem_Show.Size = new System.Drawing.Size(180, 22);
+            this.ToolStripMenuItem_Show.Size = new System.Drawing.Size(134, 22);
             this.ToolStripMenuItem_Show.Text = "Show";
             // 
             // ToolStripMenuItem_Minimized
             // 
             this.ToolStripMenuItem_Minimized.Name = "ToolStripMenuItem_Minimized";
-            this.ToolStripMenuItem_Minimized.Size = new System.Drawing.Size(180, 22);
+            this.ToolStripMenuItem_Minimized.Size = new System.Drawing.Size(134, 22);
             this.ToolStripMenuItem_Minimized.Text = "Minimized";
             // 
             // ToolStripSeparator1
             // 
             this.ToolStripSeparator1.Name = "ToolStripSeparator1";
-            this.ToolStripSeparator1.Size = new System.Drawing.Size(177, 6);
+            this.ToolStripSeparator1.Size = new System.Drawing.Size(131, 6);
             // 
             // ToolStripMenuItem_Exit
             // 
             this.ToolStripMenuItem_Exit.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.ToolStripMenuItem_Exit.Name = "ToolStripMenuItem_Exit";
-            this.ToolStripMenuItem_Exit.Size = new System.Drawing.Size(180, 22);
+            this.ToolStripMenuItem_Exit.Size = new System.Drawing.Size(134, 22);
             this.ToolStripMenuItem_Exit.Text = "Exit";
             // 
             // FormMenu
@@ -133,11 +138,6 @@ namespace WindowsReplica
             this.exitToolStripMenuItem.Size = new System.Drawing.Size(94, 22);
             this.exitToolStripMenuItem.Text = "Exit";
             // 
-            // toolStripSeparator3
-            // 
-            this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(177, 6);
-            // 
             // WindowsReplica
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -147,7 +147,7 @@ namespace WindowsReplica
             this.ContextMenuStrip = this.FormMenu;
             this.ControlBox = false;
             this.DoubleBuffered = true;
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.ImeMode = System.Windows.Forms.ImeMode.Off;
             this.MaximizeBox = false;
