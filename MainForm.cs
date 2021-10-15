@@ -250,14 +250,14 @@ namespace WindowsReplica
             if (Click_Through_Temp == false)
             {
                 SetWindowLong(this.Handle, GWL_EXSTYLE, GetWindowLong(this.Handle, GWL_EXSTYLE) | WS_EX_LAYERED | WS_EX_TRANSPARENT);
+                ToolStripMenuItem_ClickThrough.Checked = true;
                 Click_Through_Temp = true;
-                ToolStripMenuItem_Reset.Checked = true; //Taskbar
             }
             else
             {
                 SetWindowLong(this.Handle, GWL_EXSTYLE, GetWindowLong(this.Handle, GWL_EXSTYLE) & ~WS_EX_LAYERED & ~WS_EX_TRANSPARENT);
+                ToolStripMenuItem_ClickThrough.Checked = false;
                 Click_Through_Temp = false;
-                ToolStripMenuItem_Reset.Checked = false; //Taskbar
             }
         }
 
@@ -452,6 +452,10 @@ namespace WindowsReplica
 
                 case "ToolStripMenuItem_Reset": //重設
                     Reset();
+                    break;
+
+                case "ToolStripMenuItem_ClickThrough": //置頂
+                    ClickThrough();
                     break;
 
                 case "ToolStripMenuItem_OnTop": //置頂
