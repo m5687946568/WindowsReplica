@@ -16,10 +16,11 @@ namespace WindowsReplica
         public WindowsReplica()
         {
             InitializeComponent();
-            GetScreenSize(out int ScreenWidth, out int ScreenHeight);
-            this.Size = new Size(ScreenWidth / 5, ScreenHeight / 5);
-            this.MinimumSize = new Size(ScreenWidth / 10, ScreenHeight / 10);
-            this.MaximumSize = new Size(ScreenWidth, ScreenHeight);
+            Reset();
+            //GetScreenSize(out int ScreenWidth, out int ScreenHeight);
+            //this.Size = new Size(ScreenWidth / 5, ScreenHeight / 5);
+            //this.MinimumSize = new Size(ScreenWidth / 10, ScreenHeight / 10);
+            //this.MaximumSize = new Size(ScreenWidth, ScreenHeight);
         }
 
         //WndProc
@@ -374,9 +375,9 @@ namespace WindowsReplica
             }
             ResizeForm = false;
             GetScreenSize(out int ScreenWidth, out int ScreenHeight);
-            this.Size = new Size(ScreenWidth / 5, ScreenHeight / 5);
             this.MinimumSize = new Size(ScreenWidth / 10, ScreenHeight / 10);
             this.MaximumSize = new Size(ScreenWidth, ScreenHeight);
+            this.Size = new Size(ScreenWidth / 5, ScreenHeight / 5);
         }
 
 
