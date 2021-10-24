@@ -17,10 +17,6 @@ namespace WindowsReplica
         {
             InitializeComponent();
             Reset();
-            //GetScreenSize(out int ScreenWidth, out int ScreenHeight);
-            //this.Size = new Size(ScreenWidth / 5, ScreenHeight / 5);
-            //this.MinimumSize = new Size(ScreenWidth / 10, ScreenHeight / 10);
-            //this.MaximumSize = new Size(ScreenWidth, ScreenHeight);
         }
 
         //WndProc
@@ -66,12 +62,12 @@ namespace WindowsReplica
         const int ICON_SMALL2 = 2;
         const int GCL_HICONSM = (-34);
         const int GCL_HICON = -14;
-        //private static readonly int LWA_ALPHA = 0x2;
 
         //DWM功能
         const int DWM_TNP_VISIBLE = 0x8;
         const int DWM_TNP_OPACITY = 0x4;
         const int DWM_TNP_RECTDESTINATION = 0x1;
+        const int DWMWA_CLOAKED = 14;
 
         //WndProc功能
         const int WM_SIZING = 0x214;
@@ -164,13 +160,7 @@ namespace WindowsReplica
         static extern bool IsWindow(IntPtr hWnd);
 
         [DllImport("user32")]
-        static extern bool IsImmersiveProcess(IntPtr hWnd);
-
-        [DllImport("user32")]
         static extern bool IsWindowVisible(IntPtr hWnd);
-
-        [DllImport("user32")]
-        static extern bool IsIconic(IntPtr hWnd);
 
         [DllImport("user32")]
         static extern IntPtr GetShellWindow();
@@ -190,31 +180,6 @@ namespace WindowsReplica
         [DllImport("user32")]
         static extern bool ReleaseCapture();
 
-        //[DllImport("user32", EntryPoint = "SetLayeredWindowAttributes")]
-        //static extern bool SetLayeredWindowAttributes(IntPtr hWnd, int crKey, int bAlpha, int dwFlags);
-
-        //透明度
-        //SetLayeredWindowAttributes(this.Handle, 0, 225, 2);
-
-        //[DllImport("user32", SetLastError = false)]
-        //static extern bool GetWindowRect(IntPtr hWnd, out Rectangle lpRect);
-
-        //取得視窗大小
-        //private static void GetWindowSize(IntPtr hWnd, out int Width, out int Height)
-        //{
-        //    if (hWnd != null)
-        //    {
-        //        GetWindowRect(hWnd, out Rectangle size);
-        //        Width = size.Right - size.Left;
-        //        Height = size.Bottom - size.Top;
-        //    }
-        //    else
-        //    {
-        //        Width = 1;
-        //        Height = 1;
-        //    }
-        //}
-
         #endregion
 
         #region DWM功能
@@ -229,6 +194,9 @@ namespace WindowsReplica
 
         [DllImport("dwmapi")]
         static extern int DwmUpdateThumbnailProperties(IntPtr hThumb, ref DWM_THUMBNAIL_PROPERTIES props);
+
+        [DllImport("dwmapi")]
+        static extern int DwmGetWindowAttribute(IntPtr hWnd, int dwAttribute, ref int pvAttribute, int cbAttribute);
 
         #endregion
 
@@ -291,6 +259,14 @@ namespace WindowsReplica
             OrininalHeight = this.Height;
         }
 
+        //檢查程式狀態
+        static bool CkeckBackgroundAppWindow(IntPtr hWnd)
+        {
+            int CloakedCheck = -1;
+            DwmGetWindowAttribute(hWnd, DWMWA_CLOAKED, ref CloakedCheck, 4);
+            return CloakedCheck != 0;
+        }
+
         //取得Icon
         private Icon GetAppIcon(IntPtr hWnd)
         {
@@ -320,11 +296,10 @@ namespace WindowsReplica
             //項目篩選
             if (this.Handle == hWnd) { return true; }
             if (!IsWindow(hWnd)) { return true; }
-            if (IsImmersiveProcess(hWnd)) { return true; }
             if (!IsWindowVisible(hWnd)) { return true; }
-            if (IsIconic(hWnd)) { return true; }
             if (hWnd == GetShellWindow()) { return true; }
             if (GetWindowTextLength(hWnd) == 0) { return true; }
+            if (CkeckBackgroundAppWindow(hWnd)) { return true; }
             
             //添加項目
             Icon gIcon = GetAppIcon(hWnd);
@@ -375,12 +350,10 @@ namespace WindowsReplica
             }
             ResizeForm = false;
             GetScreenSize(out int ScreenWidth, out int ScreenHeight);
-            this.MinimumSize = new Size(ScreenWidth / 10, ScreenHeight / 10);
+            this.MinimumSize = new Size((int)(ScreenWidth * 0.1), (int)(ScreenHeight * 0.1));
             this.MaximumSize = new Size(ScreenWidth, ScreenHeight);
-            this.Size = new Size(ScreenWidth / 5, ScreenHeight / 5);
+            this.Size = new Size((int)(ScreenWidth * 0.4), (int)(ScreenHeight * 0.4));
         }
-
-
 
         #endregion
 
@@ -419,8 +392,11 @@ namespace WindowsReplica
         //視窗大小變更
         private void WindowsReplica_Resize(object sender, EventArgs e)
         {
-            UpdateThumb();
-            GC.Collect();
+            if (ResizeForm)
+            {
+                UpdateThumb();
+                GC.Collect();
+            }
         }
 
         //點擊穿透功能開關
@@ -500,23 +476,19 @@ namespace WindowsReplica
             }
             else
             {
-                if (Thumb != IntPtr.Zero) { DwmUnregisterThumbnail(Thumb); }
+                Reset();
                 ItemhWnd = (IntPtr)e.ClickedItem.Tag;
                 int i = DwmRegisterThumbnail(this.Handle, ItemhWnd, out Thumb);
                 if (i == 0)
                 {
-                    ResizeForm = false;
-                    DwmQueryThumbnailSourceSize(Thumb, out ThumbSize size);
-                    this.MinimumSize = new Size(0, 0);
-                    this.MaximumSize = new Size(0, 0);
-                    this.Width = size.x / 5;
-                    this.Height = size.y / 5;
-                    this.MinimumSize = new Size(size.x / 10, size.y / 10);
-                    this.MaximumSize = new Size(size.x, size.y);
+                    DwmQueryThumbnailSourceSize(Thumb, out ThumbSize CheckItemSize);
+                    this.MinimumSize = new Size((int)(CheckItemSize.x * 0.1), (int)(CheckItemSize.y * 0.1));
+                    this.MaximumSize = new Size(CheckItemSize.x, CheckItemSize.y);
+                    this.Size = new Size((int)(CheckItemSize.x * 0.4), (int)(CheckItemSize.y * 0.4));
                     UpdateThumb();
                     GetFormSize();
-                    ResizeForm = true;
                 }
+                ResizeForm = true;
                 GC.Collect();
             }
         }
