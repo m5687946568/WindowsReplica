@@ -230,21 +230,6 @@ namespace WindowsReplica
             }
         }
 
-        //置頂
-        private void ShowWindow()
-        {
-            if (this.TopMost == false)
-            {
-                this.TopMost = true;
-                this.WindowState = FormWindowState.Normal;
-                this.TopMost = false;
-            }
-            else
-            {
-                this.WindowState = FormWindowState.Normal;
-            }
-        }
-
         //取得工作區大小
         private static void GetScreenSize(out int Width,out int Height)
         {
@@ -419,19 +404,29 @@ namespace WindowsReplica
                     Close();
                     break;
 
-                case "ToolStripMenuItem_Minimized": //縮小
-                    this.WindowState = FormWindowState.Minimized;
+                case "ToolStripMenuItem_Hide": //隱藏
+                    this.Hide();
                     break;
 
                 case "ToolStripMenuItem_Show": //顯示
-                    ShowWindow();
+                    this.Show();
+                    if (this.TopMost == false)
+                    {
+                        this.TopMost = true;
+                        this.TopMost = false;
+                    }
+                    else
+                    {
+                        this.TopMost = false;
+                        this.TopMost = true;
+                    }
                     break;
 
                 case "ToolStripMenuItem_Reset": //重設
                     Reset();
                     break;
 
-                case "ToolStripMenuItem_ClickThrough": //置頂
+                case "ToolStripMenuItem_ClickThrough": //點擊穿透
                     ClickThrough();
                     break;
 
