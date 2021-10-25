@@ -63,10 +63,10 @@ namespace WindowsReplica
             this.ToolStripMenuItem_OnTop,
             this.ToolStripMenuItem_ClickThrough,
             this.toolStripSeparator3,
-            this.ToolStripMenuItem_Reset,
-            this.ToolStripSeparator2,
             this.ToolStripMenuItem_Show,
             this.ToolStripMenuItem_Hide,
+            this.ToolStripSeparator2,
+            this.ToolStripMenuItem_Reset,
             this.ToolStripSeparator1,
             this.ToolStripMenuItem_Exit});
             this.NotifyIconMenu.Name = "notifyIconmenu";
