@@ -1,11 +1,7 @@
 ﻿using System;
-//using System.Collections.Generic;
 using System.ComponentModel;
-//using System.Data;
 using System.Drawing;
-//using System.Linq;
 using System.Text;
-//using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
 
@@ -19,258 +15,19 @@ namespace WindowsReplica
             Reset();
         }
 
-        //WndProc
-        protected override void WndProc(ref Message m)
-        {
-            if (ResizeForm)
-            {
-                if (m.Msg == WM_SIZING)
-                {
-                    RECT rc = (RECT)Marshal.PtrToStructure(m.LParam, typeof(RECT));
-
-                    int w = rc.Right - rc.Left;
-                    int h = rc.Bottom - rc.Top;
-
-                    switch (m.WParam.ToInt32()) // Resize handle
-                    {
-                        case WMSZ_LEFT:
-                        case WMSZ_RIGHT:
-                            // Left or right handles, adjust height                        
-                            rc.Bottom = rc.Top + (int)(OrininalHeight * w / OrininalWidth);
-                            break;
-
-                        case WMSZ_TOP:
-                        case WMSZ_BOTTOM:
-                            // Top or bottom handles, adjust width
-                            rc.Right = rc.Left + (int)(OrininalWidth * h / OrininalHeight);
-                            break;
-                    }
-                    Marshal.StructureToPtr(rc, m.LParam, true);
-                }
-            }
-            base.WndProc(ref m);
-        }
-
-        #region 常數及結構
-        //Win32 helper 功能
-        const int GWL_EXSTYLE = (-20);
-        const int WS_EX_LAYERED = 0x00080000;
-        const int WS_EX_TRANSPARENT = 0x00000020;
-        const int WM_GETICON = 0x7F;
-        const int ICON_SMALL = 0;
-        const int ICON_BIG = 1;
-        const int ICON_SMALL2 = 2;
-        const int GCL_HICONSM = (-34);
-        const int GCL_HICON = -14;
-
-        //DWM功能
-        const int DWM_TNP_VISIBLE = 0x8;
-        const int DWM_TNP_OPACITY = 0x4;
-        const int DWM_TNP_RECTDESTINATION = 0x1;
-        const int DWMWA_CLOAKED = 14;
-
-        //WndProc功能
-        const int WM_SIZING = 0x214;
-        const int WM_NCLBUTTONDOWN = 0xA1; //游標位於視窗的非工作區內按下滑鼠左鍵
-        const int HT_CAPTION = 2; //在標題列中
-        const int HT_LEFT = 10; //在可調整大小之視窗的左框線中 
-        const int HT_RIGHT = 11; //在可調整大小之視窗的右框線中 
-        const int HT_TOP = 12; //在可調整大小之視窗的上框線中 
-        const int HT_BOTTOM = 15; //在可調整大小之視窗的下框線中 
-        const int WMSZ_LEFT = 1; //改變視窗左大小
-        const int WMSZ_RIGHT = 2; //改變視窗右大小
-        const int WMSZ_TOP = 3; //改變視窗頂部大小
-        const int WMSZ_BOTTOM = 6; //改變視窗底部大小
-
-
-        //鼠標位置
-        const int _ = 4; //邊距
-        Rectangle RectangleCentre { get { return new Rectangle(_, _, this.ClientSize.Width - _ - _, this.ClientSize.Height - _ - _); } }
-        Rectangle RectangleTop { get { return new Rectangle(0, 0, this.ClientSize.Width, _); } }
-        Rectangle RectangleLeft { get { return new Rectangle(0, 0, _, this.ClientSize.Height); } }
-        Rectangle RectangleBottom { get { return new Rectangle(0, this.ClientSize.Height - _, this.ClientSize.Width, _); } }
-        Rectangle RectangleRight { get { return new Rectangle(this.ClientSize.Width - _, 0, _, this.ClientSize.Height); } }
-
-        //功能開關
-        bool Click_Through_Temp = false;
-        bool ResizeForm = false;
-
-        //Window
-        IntPtr ItemhWnd;
-        double OrininalHeight, OrininalWidth;
-
-        //Thumb
         IntPtr Thumb;
         int LeftAndTop;
         int RightAndBottom;
-        internal struct DWM_THUMBNAIL_PROPERTIES
-        {
-            public int dwFlags;
-            public ThumbRect rcDestination;
-            public ThumbRect rcSource;
-            public byte opacity;
-            public bool fVisible;
-            public bool fSourceClientAreaOnly;
-        }
-        internal struct ThumbRect
-        {
-            internal ThumbRect(int left, int top, int right, int bottom)
-            {
-                Left = left;
-                Top = top;
-                Right = right;
-                Bottom = bottom;
-            }
+        bool ResizeForm = false;
+        int OItemHeight, OItemWidth;
+        int NFormHeight, NFormWidth;
 
-            public int Left;
-            public int Top;
-            public int Right;
-            public int Bottom;
-        }
-        internal struct ThumbSize
-        {
-            public int x;
-            public int y;
-        }
-        internal struct RECT
-        {
-            public int Left;
-            public int Top;
-            public int Right;
-            public int Bottom;
-        }
-
-        #endregion
-
-        #region Win32 helper 功能
-        [DllImport("user32", CharSet = CharSet.Unicode)]
-        static extern int GetWindowLong(IntPtr hWnd, int nIndex);
-
-        [DllImport("user32", CharSet = CharSet.Unicode)]
-        static extern void GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
-
-        [DllImport("user32")]
-        static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
-
-        [DllImport("user32")]
-        static extern int EnumWindows(EnumWindowsProc lpEnumFunc, int lParam);
-        delegate bool EnumWindowsProc(IntPtr hWnd, int lParam);
-
-        [DllImport("user32")]
-        static extern bool IsWindow(IntPtr hWnd);
-
-        [DllImport("user32")]
-        static extern bool IsWindowVisible(IntPtr hWnd);
-
-        [DllImport("user32")]
-        static extern IntPtr GetShellWindow();
-
-        [DllImport("user32")]
-        static extern int GetWindowTextLength(IntPtr hWnd);
-
-        [DllImport("user32", SetLastError = false)]
-        static extern IntPtr SendMessage(IntPtr hWnd, int msg, int wParam, int lParam);
-
-        [DllImport("user32", EntryPoint = "GetClassLong")]
-        static extern int GetClassLongPtr32(IntPtr hWnd, int nIndex);
-
-        [DllImport("user32", EntryPoint = "GetClassLongPtr")]
-        static extern IntPtr GetClassLongPtr64(IntPtr hWnd, int nIndex);
-
-        [DllImport("user32")]
-        static extern bool ReleaseCapture();
-
-        #endregion
-
-        #region DWM功能
-        [DllImport("dwmapi")]
-        static extern int DwmRegisterThumbnail(IntPtr dest, IntPtr src, out IntPtr thumb);
-
-        [DllImport("dwmapi")]
-        static extern int DwmUnregisterThumbnail(IntPtr thumb);
-
-        [DllImport("dwmapi")]
-        static extern int DwmQueryThumbnailSourceSize(IntPtr thumb, out ThumbSize size);
-
-        [DllImport("dwmapi")]
-        static extern int DwmUpdateThumbnailProperties(IntPtr hThumb, ref DWM_THUMBNAIL_PROPERTIES props);
-
-        [DllImport("dwmapi")]
-        static extern int DwmGetWindowAttribute(IntPtr hWnd, int dwAttribute, ref int pvAttribute, int cbAttribute);
-
-        #endregion
-
-        #region 副程式
-        private static IntPtr GetClassLongPtr(IntPtr hWnd, int nIndex)
-        {
-            if (IntPtr.Size > 4)
-            {
-                return GetClassLongPtr64(hWnd, nIndex);
-            }
-            else
-            {
-                return new IntPtr(GetClassLongPtr32(hWnd, nIndex));
-            }
-        }
-
-        //點擊穿透
-        private void ClickThrough()
-        {
-            if (Click_Through_Temp == false)
-            {
-                SetWindowLong(this.Handle, GWL_EXSTYLE, GetWindowLong(this.Handle, GWL_EXSTYLE) | WS_EX_LAYERED | WS_EX_TRANSPARENT);
-                ToolStripMenuItem_ClickThrough.Checked = true;
-                Click_Through_Temp = true;
-            }
-            else
-            {
-                SetWindowLong(this.Handle, GWL_EXSTYLE, GetWindowLong(this.Handle, GWL_EXSTYLE) & ~WS_EX_LAYERED & ~WS_EX_TRANSPARENT);
-                ToolStripMenuItem_ClickThrough.Checked = false;
-                Click_Through_Temp = false;
-            }
-        }
-
-        //取得工作區大小
-        private static void GetScreenSize(out int Width,out int Height)
-        {
-            Width = Screen.PrimaryScreen.WorkingArea.Width;
-            Height = Screen.PrimaryScreen.WorkingArea.Height;
-        }
-
-        //取得Form大小
-        private void GetFormSize()
-        {
-            OrininalWidth = this.Width;
-            OrininalHeight = this.Height;
-        }
-
-        //檢查程式狀態
-        static bool CkeckBackgroundAppWindow(IntPtr hWnd)
-        {
-            int CloakedCheck = -1;
-            DwmGetWindowAttribute(hWnd, DWMWA_CLOAKED, ref CloakedCheck, 4);
-            return CloakedCheck != 0;
-        }
-
-        //取得Icon
-        private Icon GetAppIcon(IntPtr hWnd)
-        {
-            IntPtr iconHandle = SendMessage(hWnd, WM_GETICON, ICON_SMALL2, 0);
-            if (iconHandle == IntPtr.Zero) { iconHandle = SendMessage(hWnd, WM_GETICON, ICON_SMALL, 0); }
-            if (iconHandle == IntPtr.Zero) { iconHandle = SendMessage(hWnd, WM_GETICON, ICON_BIG, 0); }
-            if (iconHandle == IntPtr.Zero) { iconHandle = GetClassLongPtr(hWnd, GCL_HICON); }
-            if (iconHandle == IntPtr.Zero) { iconHandle = GetClassLongPtr(hWnd, GCL_HICONSM); }
-            if (iconHandle == IntPtr.Zero) { return null; }
-            Icon gIicon = Icon.FromHandle(iconHandle);
-            return gIicon;
-        }
-
-        //取得程式清單
+        #region 取得程式清單
         private void GetWindows()
         {
             FormMenu.Items.Clear();
             FormMenu.Items.Add("--None--");
-            EnumWindows(EnumWindowCallback, 0);
+            Dll_Import.EnumWindows(EnumWindowCallback, 0);
             FormMenu.Items.Add("-");
             FormMenu.Items.Add("Exit");
         }
@@ -279,17 +36,14 @@ namespace WindowsReplica
         private bool EnumWindowCallback(IntPtr hWnd, int lParam)
         {
             //項目篩選
-            if (this.Handle == hWnd) { return true; }
-            if (!IsWindow(hWnd)) { return true; }
-            if (!IsWindowVisible(hWnd)) { return true; }
-            if (hWnd == GetShellWindow()) { return true; }
-            if (GetWindowTextLength(hWnd) == 0) { return true; }
-            if (CkeckBackgroundAppWindow(hWnd)) { return true; }
-            
+            if (!Function.IsWindowValidForCapture(hWnd)) { return true; }
+
+            //取得ICON
+            Icon gIcon = Function.GetAppIcon(hWnd);
+
             //添加項目
-            Icon gIcon = GetAppIcon(hWnd);
             StringBuilder sb = new StringBuilder(256);
-            GetWindowText(hWnd, sb, sb.Capacity);
+            Dll_Import.GetWindowText(hWnd, sb, sb.Capacity);
             if (gIcon != null)
             {
                 ToolStripMenuItem nItem = new ToolStripMenuItem();
@@ -307,57 +61,118 @@ namespace WindowsReplica
             }
             return true;
         }
+        #endregion
 
-        //更新thumbnail屬性
-        private void UpdateThumb()
+        #region 點擊穿透
+        bool Click_Through_Temp = false;
+        private void ClickThrough()
         {
-            LeftAndTop = 1;
-            RightAndBottom = -1;
-            if (Thumb != IntPtr.Zero)
+            if (Click_Through_Temp == false)
             {
-                DWM_THUMBNAIL_PROPERTIES props = new DWM_THUMBNAIL_PROPERTIES
-                {
-                    fVisible = true,
-                    dwFlags = DWM_TNP_VISIBLE | DWM_TNP_RECTDESTINATION | DWM_TNP_OPACITY,
-                    opacity = 255,
-                    rcDestination = new ThumbRect(LeftAndTop, LeftAndTop, this.Width + RightAndBottom, this.Height + RightAndBottom)
-                };
-                DwmUpdateThumbnailProperties(Thumb, ref props);
+                Dll_Import.SetWindowLong(this.Handle, (int)Enum.GWL.GWL_EXSTYLE, Dll_Import.GetWindowLong(this.Handle, (int)Enum.GWL.GWL_EXSTYLE) | (long)Enum.WS.WS_EX_LAYERED | (long)Enum.WS.WS_EX_TRANSPARENT);
+                ToolStripMenuItem_ClickThrough.Checked = true;
+                Click_Through_Temp = true;
+            }
+            else
+            {
+                Dll_Import.SetWindowLong(this.Handle, (int)Enum.GWL.GWL_EXSTYLE, Dll_Import.GetWindowLong(this.Handle, (int)Enum.GWL.GWL_EXSTYLE) & ~(long)Enum.WS.WS_EX_LAYERED & ~(long)Enum.WS.WS_EX_TRANSPARENT);
+                ToolStripMenuItem_ClickThrough.Checked = false;
+                Click_Through_Temp = false;
             }
         }
+        #endregion
 
-        //重設
+        #region 重設
         private void Reset()
         {
             if (Thumb != IntPtr.Zero)
             {
-                DwmUnregisterThumbnail(Thumb);
+                Dll_Import.DwmUnregisterThumbnail(Thumb);
             }
             ResizeForm = false;
-            GetScreenSize(out int ScreenWidth, out int ScreenHeight);
+            Function.GetScreenSize(out int ScreenWidth, out int ScreenHeight);
             this.MinimumSize = new Size((int)(ScreenWidth * 0.1), (int)(ScreenHeight * 0.1));
             this.MaximumSize = new Size(ScreenWidth, ScreenHeight);
             this.Size = new Size((int)(ScreenWidth * 0.4), (int)(ScreenHeight * 0.4));
+            GC.Collect();
         }
-
         #endregion
 
-        #region 事件
-        //視窗移動及調整視窗大小功能
+        #region 更新thumbnail屬性
+        public void UpdateThumb()
+        {
+            LeftAndTop = 0;
+            RightAndBottom = 0;
+            if (Thumb != IntPtr.Zero)
+            {
+                Struct.DWM_THUMBNAIL_PROPERTIES props = new Struct.DWM_THUMBNAIL_PROPERTIES
+                {
+                    dwFlags = (uint)(Enum.DWM.DWM_TNP_RECTDESTINATION | Enum.DWM.DWM_TNP_OPACITY | Enum.DWM.DWM_TNP_VISIBLE | Enum.DWM.DWM_TNP_SOURCECLIENTAREAONLY),
+                    rcDestination = new Struct.ThumbRect(LeftAndTop, LeftAndTop, this.Width + RightAndBottom, this.Height + RightAndBottom),
+                    opacity = 255,
+                    fVisible = true,
+                    fSourceClientAreaOnly = false
+                };
+                Dll_Import.DwmUpdateThumbnailProperties(Thumb, ref props);
+                NFormHeight = this.Height;
+                NFormWidth = this.Width;
+            }
+        }
+        #endregion
+
+        #region 改變視窗大小
+        //WndProc
+        protected override void WndProc(ref Message m)
+        {
+            if (ResizeForm)
+            {
+                if (m.Msg == (int)Enum.WM.WM_SIZING)
+                {
+                    Struct.RECT rc = (Struct.RECT)Marshal.PtrToStructure(m.LParam, typeof(Struct.RECT));
+                    switch (m.WParam.ToInt32()) // Resize handle
+                    {
+                        case (int)Enum.WMSZ.WMSZ_LEFT:
+                        case (int)Enum.WMSZ.WMSZ_RIGHT:
+                            // Left or right handles, adjust height                        
+                            rc.Bottom = rc.Top + (int)(OItemHeight * NFormWidth / OItemWidth);
+                            UpdateThumb();
+                            break;
+
+                        case (int)Enum.WMSZ.WMSZ_TOP:
+                        case (int)Enum.WMSZ.WMSZ_BOTTOM:
+                            // Top or bottom handles, adjust width
+                            rc.Right = rc.Left + (int)(OItemWidth * NFormHeight / OItemHeight);
+                            UpdateThumb();
+                            break;
+                    }
+                    Marshal.StructureToPtr(rc, m.LParam, true);
+                }
+            }
+            base.WndProc(ref m);
+        }
+
+        const int _ = 5; //邊距
+        Rectangle RectangleCentre { get { return new Rectangle(_, _, this.ClientSize.Width - _ - _, this.ClientSize.Height - _ - _); } }
+        Rectangle RectangleTop { get { return new Rectangle(0, 0, this.ClientSize.Width, _); } }
+        Rectangle RectangleLeft { get { return new Rectangle(0, 0, _, this.ClientSize.Height); } }
+        Rectangle RectangleBottom { get { return new Rectangle(0, this.ClientSize.Height - _, this.ClientSize.Width, _); } }
+        Rectangle RectangleRight { get { return new Rectangle(this.ClientSize.Width - _, 0, _, this.ClientSize.Height); } }
+
+        //事件_滑鼠按下
         private void WindowsReplica_MouseDown(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
             {
                 var cursor = this.PointToClient(Cursor.Position);
-                if (RectangleCentre.Contains(cursor)) { ReleaseCapture(); SendMessage(Handle, WM_NCLBUTTONDOWN, HT_CAPTION, 0); }
-                else if (RectangleTop.Contains(cursor)) { ReleaseCapture(); SendMessage(Handle, WM_NCLBUTTONDOWN, HT_TOP, 0); }
-                else if (RectangleLeft.Contains(cursor)) { ReleaseCapture(); SendMessage(Handle, WM_NCLBUTTONDOWN, HT_LEFT, 0); }
-                else if (RectangleRight.Contains(cursor)) { ReleaseCapture(); SendMessage(Handle, WM_NCLBUTTONDOWN, HT_RIGHT, 0); }
-                else if (RectangleBottom.Contains(cursor)) { ReleaseCapture(); SendMessage(Handle, WM_NCLBUTTONDOWN, HT_BOTTOM, 0); }
+                if (RectangleCentre.Contains(cursor)) { Dll_Import.ReleaseCapture(); Dll_Import.SendMessage(Handle, (uint)Enum.WM.WM_NCLBUTTONDOWN, (int)Enum.HT.HT_CAPTION, 0); }
+                else if (RectangleTop.Contains(cursor)) { Dll_Import.ReleaseCapture(); Dll_Import.SendMessage(Handle, (uint)Enum.WM.WM_NCLBUTTONDOWN, (int)Enum.HT.HT_TOP, 0); }
+                else if (RectangleLeft.Contains(cursor)) { Dll_Import.ReleaseCapture(); Dll_Import.SendMessage(Handle, (uint)Enum.WM.WM_NCLBUTTONDOWN, (int)Enum.HT.HT_LEFT, 0); }
+                else if (RectangleRight.Contains(cursor)) { Dll_Import.ReleaseCapture(); Dll_Import.SendMessage(Handle, (uint)Enum.WM.WM_NCLBUTTONDOWN, (int)Enum.HT.HT_RIGHT, 0); }
+                else if (RectangleBottom.Contains(cursor)) { Dll_Import.ReleaseCapture(); Dll_Import.SendMessage(Handle, (uint)Enum.WM.WM_NCLBUTTONDOWN, (int)Enum.HT.HT_BOTTOM, 0); }
             }
         }
 
-        //視窗鼠標
+        //事件_滑鼠移動
         private void WindowsReplica_MouseMove(object sender, MouseEventArgs e)
         {
             if (e.X <= _ || e.X + _ >= this.Width)
@@ -373,28 +188,19 @@ namespace WindowsReplica
                 this.Cursor = Cursors.Default;
             }
         }
+        #endregion
 
-        //視窗大小變更
-        private void WindowsReplica_Resize(object sender, EventArgs e)
-        {
-            if (ResizeForm)
-            {
-                UpdateThumb();
-                GC.Collect();
-            }
-        }
-
-        //點擊穿透功能開關
+        #region 事件_工具列圖示點擊
         private void NotifyIcon_MouseClick(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left) 
             {
                 ClickThrough();
             }
-            GC.Collect();
         }
+        #endregion
 
-        //工作列選單點選
+        #region 事件_工作列選單點選
         private void NotifyIconMenu_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
         {
             switch(e.ClickedItem.Name)
@@ -446,17 +252,18 @@ namespace WindowsReplica
                 default:
                     break;
             }
-            GC.Collect();
         }
+        #endregion
 
-        //程式清單
+        #region 事件_開啟Form選單
         private void FormMenu_Opening(object sender, CancelEventArgs e)
         {
             GetWindows();
             GC.Collect();
         }
+        #endregion
 
-        //程式清單點選
+        #region 事件_Form選單點選
         private void FormMenu_ItemClick(object sender, ToolStripItemClickedEventArgs e)
         {
             if (e.ClickedItem.Text == "Exit")
@@ -467,28 +274,28 @@ namespace WindowsReplica
             else if (e.ClickedItem.Text == "--None--")
             {
                 Reset();
-                GC.Collect();
             }
             else
             {
                 Reset();
-                ItemhWnd = (IntPtr)e.ClickedItem.Tag;
-                int i = DwmRegisterThumbnail(this.Handle, ItemhWnd, out Thumb);
+                IntPtr ItemhWnd = (IntPtr)e.ClickedItem.Tag;
+                int i = Dll_Import.DwmRegisterThumbnail(this.Handle, ItemhWnd, out Thumb);
                 if (i == 0)
                 {
-                    DwmQueryThumbnailSourceSize(Thumb, out ThumbSize CheckItemSize);
-                    this.MinimumSize = new Size((int)(CheckItemSize.x * 0.1), (int)(CheckItemSize.y * 0.1));
-                    this.MaximumSize = new Size(CheckItemSize.x, CheckItemSize.y);
-                    this.Size = new Size((int)(CheckItemSize.x * 0.4), (int)(CheckItemSize.y * 0.4));
+                    Dll_Import.DwmQueryThumbnailSourceSize(Thumb, out Struct.ThumbSize CheckItemSize);
+                    OItemWidth = CheckItemSize.x;
+                    OItemHeight = CheckItemSize.y;
+                    this.MinimumSize = new Size((int)(OItemWidth * 0.1), (int)(OItemHeight * 0.1));
+                    this.MaximumSize = new Size(OItemWidth, OItemHeight);
+                    this.Size = new Size((int)(OItemWidth * 0.4), (int)(OItemHeight * 0.4));
                     UpdateThumb();
-                    GetFormSize();
                 }
                 ResizeForm = true;
                 GC.Collect();
             }
         }
-
         #endregion
+
 
     }
 }
