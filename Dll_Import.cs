@@ -7,7 +7,6 @@ namespace WindowsReplica
     class Dll_Import
     {
         #region user32.dll
-        //----------------------
         [DllImport("user32.dll")]
         public static extern IntPtr GetShellWindow();
 
@@ -23,23 +22,11 @@ namespace WindowsReplica
         [DllImport("user32.dll")]
         public static extern int GetWindowTextLength(IntPtr hWnd);
 
-        [DllImport("user32.dll", EntryPoint = "GetWindowLong")]
-        static extern IntPtr GetWindowLongPtr32(IntPtr hWnd, int nIndex);
+        [DllImport("user32.dll", EntryPoint = "GetClassLongPtr")]
+        public static extern IntPtr GetClassLongPtr(IntPtr hWnd, int nIndex);
 
-        [DllImport("user32.dll", EntryPoint = "GetWindowLongPtr")]
-        static extern IntPtr GetWindowLongPtr64(IntPtr hWnd, int nIndex);
-
-        public static IntPtr GetWindowLongPtr(IntPtr hWnd, int nIndex)
-        {
-            if (IntPtr.Size == 8)
-            {
-                return GetWindowLongPtr64(hWnd, nIndex);
-            }
-            else
-            {
-                return GetWindowLongPtr32(hWnd, nIndex);
-            }
-        }
+        [DllImport("user32.dll")]
+        public static extern IntPtr LoadIcon(IntPtr hInstance, IntPtr lpIconName);
 
         [DllImport("user32.dll", CharSet = CharSet.Unicode)]
         public static extern long GetWindowLong(IntPtr hWnd, int nIndex);

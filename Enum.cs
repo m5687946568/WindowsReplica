@@ -96,8 +96,13 @@ namespace WindowsReplica
 
         public enum GCL : int
         {
-            GCL_HICONSM = (-34),
-            GCL_HICON = (-14)
+            GCLP_HICONSM = (-34),
+            GCLP_HICON = (-14)
+        }
+
+        public enum IDI : uint
+        {
+            IDI_APPLICATION = 32512
         }
 
         public enum DWMWINDOWATTRIBUTE : uint

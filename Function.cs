@@ -40,17 +40,30 @@ namespace WindowsReplica
         #region 取得Icon
         public static Icon GetAppIcon(IntPtr hWnd)
         {
-            IntPtr iconHandle = Dll_Import.SendMessage(hWnd, (uint)Enum.WM.WM_GETICON, (int)Enum.Icon.ICON_SMALL2, 0);
-            if (iconHandle == IntPtr.Zero) { iconHandle = Dll_Import.SendMessage(hWnd, (uint)Enum.WM.WM_GETICON, (int)Enum.Icon.ICON_SMALL, 0); }
-            if (iconHandle == IntPtr.Zero) { iconHandle = Dll_Import.SendMessage(hWnd, (uint)Enum.WM.WM_GETICON, (int)Enum.Icon.ICON_BIG, 0); }
-            if (iconHandle == IntPtr.Zero) { iconHandle = Dll_Import.GetWindowLongPtr(hWnd, (int)Enum.GCL.GCL_HICON); }
-            if (iconHandle == IntPtr.Zero) { iconHandle = Dll_Import.GetWindowLongPtr(hWnd, (int)Enum.GCL.GCL_HICONSM); }
-            if (iconHandle == IntPtr.Zero) { return null; }
-            Icon gIicon = Icon.FromHandle(iconHandle);
-            return gIicon;
+            try
+            {
+                IntPtr iconHandle = Dll_Import.SendMessage(hWnd, (uint)Enum.WM.WM_GETICON, (int)Enum.Icon.ICON_SMALL2, 0);
+                if (iconHandle == IntPtr.Zero) { iconHandle = Dll_Import.SendMessage(hWnd, (uint)Enum.WM.WM_GETICON, (int)Enum.Icon.ICON_SMALL, 0); }
+                if (iconHandle == IntPtr.Zero) { iconHandle = Dll_Import.SendMessage(hWnd, (uint)Enum.WM.WM_GETICON, (int)Enum.Icon.ICON_BIG, 0); }
+                if (iconHandle == IntPtr.Zero) { iconHandle = Dll_Import.GetClassLongPtr(hWnd, (int)Enum.GCL.GCLP_HICON); }
+                if (iconHandle == IntPtr.Zero) { iconHandle = Dll_Import.GetClassLongPtr(hWnd, (int)Enum.GCL.GCLP_HICONSM); }
+                if (iconHandle == IntPtr.Zero) { iconHandle = Dll_Import.LoadIcon(IntPtr.Zero, (IntPtr)Enum.IDI.IDI_APPLICATION); }
+                if (iconHandle != IntPtr.Zero)
+                {
+                    Icon gIcon = Icon.FromHandle(iconHandle);
+                    return gIcon;
+                }
+                else
+                { 
+                    return null;
+                }
+            }
+            catch
+            {
+                return null;
+            }
         }
         #endregion
-
 
     }
 }
