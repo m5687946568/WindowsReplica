@@ -17,6 +17,6 @@
  
 **In the window:**
 
-* Select the program: Click the right mouse button
+* Click the right mouse button: Select the program
 
-* Move the window: Hold down the left mouse button
+* Hold down the left mouse button: Move the window
