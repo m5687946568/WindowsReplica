@@ -12,6 +12,7 @@ namespace WindowsReplica
         public WindowsReplica()
         {
             InitializeComponent();
+            this.BackColor = Dcolor;
             Reset();
         }
 
@@ -21,6 +22,8 @@ namespace WindowsReplica
         bool ResizeForm = false;
         int OItemHeight, OItemWidth;
         int NFormHeight, NFormWidth;
+        Color Dcolor = Color.DarkSlateGray;
+        Color Ncolor = Color.DimGray;
 
         #region 取得程式清單
         private void GetWindows()
@@ -94,15 +97,14 @@ namespace WindowsReplica
             this.MinimumSize = new Size((int)(ScreenWidth * 0.1), (int)(ScreenHeight * 0.1));
             this.MaximumSize = new Size(ScreenWidth, ScreenHeight);
             this.Size = new Size((int)(ScreenWidth * 0.4), (int)(ScreenHeight * 0.4));
-            GC.Collect();
         }
         #endregion
 
         #region 更新thumbnail屬性
         public void UpdateThumb()
         {
-            LeftAndTop = 0;
-            RightAndBottom = 0;
+            LeftAndTop = 1;
+            RightAndBottom = -1;
             if (Thumb != IntPtr.Zero)
             {
                 Struct.DWM_THUMBNAIL_PROPERTIES props = new Struct.DWM_THUMBNAIL_PROPERTIES
@@ -273,7 +275,9 @@ namespace WindowsReplica
             }
             else if (e.ClickedItem.Text == "--None--")
             {
+                this.BackColor = Dcolor;
                 Reset();
+                GC.Collect();
             }
             else
             {
@@ -282,6 +286,7 @@ namespace WindowsReplica
                 int i = Dll_Import.DwmRegisterThumbnail(this.Handle, ItemhWnd, out Thumb);
                 if (i == 0)
                 {
+                    this.BackColor = Ncolor;
                     Dll_Import.DwmQueryThumbnailSourceSize(Thumb, out Struct.ThumbSize CheckItemSize);
                     OItemWidth = CheckItemSize.x;
                     OItemHeight = CheckItemSize.y;
@@ -289,8 +294,13 @@ namespace WindowsReplica
                     this.MaximumSize = new Size(OItemWidth, OItemHeight);
                     this.Size = new Size((int)(OItemWidth * 0.4), (int)(OItemHeight * 0.4));
                     UpdateThumb();
+                    ResizeForm = true;
                 }
-                ResizeForm = true;
+                else
+                {
+                    this.BackColor = Dcolor;
+                    Reset();
+                }
                 GC.Collect();
             }
         }
