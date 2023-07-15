@@ -50,7 +50,8 @@ namespace WindowsReplica
             WS_VISIBLE = 0x10000000,
             WS_VSCROLL = 0x200000,
             WS_EX_TRANSPARENT = 0x00000020,
-            WS_EX_LAYERED = 0x00080000
+            WS_EX_LAYERED = 0x00080000,
+            WS_EX_TOOLWINDOW = 0x00000080
         }
 
         public enum WM : uint
@@ -83,8 +84,10 @@ namespace WindowsReplica
             DWM_TNP_RECTSOURCE = 0x00000002,
             DWM_TNP_OPACITY = 0x00000004,
             DWM_TNP_VISIBLE = 0x00000008,
-            DWM_TNP_SOURCECLIENTAREAONLY = 0x00000010
-
+            DWM_TNP_SOURCECLIENTAREAONLY = 0x00000010,
+            DWM_CLOAKED_APP = 0x0000001,
+            DWM_CLOAKED_SHELL = 0x0000002,
+            DWM_CLOAKED_INHERITED = 0x0000004
         }
 
         public enum Icon : uint

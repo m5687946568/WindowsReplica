@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Drawing;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+
 
 namespace WindowsReplica
 {
@@ -18,12 +21,9 @@ namespace WindowsReplica
         #region 項目篩選
         public static bool IsWindowValidForCapture(IntPtr hWnd)
         {
-            if (hWnd.ToInt32() == 0) { return false; }
             if (hWnd == Dll_Import.GetShellWindow()) { return false; }
-            if (!Dll_Import.IsWindow(hWnd)) { return false; }
             if (!Dll_Import.IsWindowVisible(hWnd)) { return false; }
             if (Dll_Import.GetAncestor(hWnd, Enum.GetAncestorFlags.GetRoot) != hWnd) { return false; }
-            if (Process.GetCurrentProcess().MainWindowHandle == hWnd) { return false; }
             if (Dll_Import.GetWindowTextLength(hWnd) == 0) { return false; }
             if (CkeckBackgroundAppWindow(hWnd)) { return false; }
             return true;
@@ -31,9 +31,15 @@ namespace WindowsReplica
 
         static bool CkeckBackgroundAppWindow(IntPtr hWnd)
         {
-            var cloaked = false;
-            Dll_Import.DwmGetWindowAttribute(hWnd, Enum.DWMWINDOWATTRIBUTE.Cloaked, out cloaked, 4);
-            return cloaked;
+            Dll_Import.DwmGetWindowAttribute(hWnd, Enum.DWMWINDOWATTRIBUTE.Cloaked, out int cloaked, Marshal.SizeOf(typeof(bool)));
+            if (cloaked == (int)Enum.DWM.DWM_CLOAKED_APP)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
         #endregion
 

@@ -17,11 +17,10 @@ namespace WindowsReplica
         }
 
         IntPtr Thumb;
-        int LeftAndTop;
-        int RightAndBottom;
         bool ResizeForm = false;
-        int OItemHeight, OItemWidth;
-        int NFormHeight, NFormWidth;
+        int FormMargins = 1;
+        int initialDwmHeight, initialDwmWidth;
+        int currentDwmHeight, currentDwmWidth;
         Color Dcolor = Color.DarkSlateGray;
         Color Ncolor = Color.DimGray;
 
@@ -47,10 +46,18 @@ namespace WindowsReplica
             //添加項目
             StringBuilder sb = new StringBuilder(256);
             Dll_Import.GetWindowText(hWnd, sb, sb.Capacity);
+            int maxitemlength = 20;
             if (gIcon != null)
             {
                 ToolStripMenuItem nItem = new ToolStripMenuItem();
-                nItem.Text = sb.ToString();
+                if (sb.Length > maxitemlength)
+                {
+                    nItem.Text = sb.ToString().Substring(0, maxitemlength) + " ...";
+                }
+                else
+                {
+                    nItem.Text = sb.ToString();
+                }
                 nItem.Image = gIcon.ToBitmap();
                 nItem.Tag = hWnd;
                 FormMenu.Items.Add(nItem);
@@ -58,7 +65,14 @@ namespace WindowsReplica
             else
             {
                 ToolStripMenuItem nItem = new ToolStripMenuItem();
-                nItem.Text = sb.ToString();
+                if (sb.Length > maxitemlength)
+                {
+                    nItem.Text = sb.ToString().Substring(0, maxitemlength) + " ...";
+                }
+                else
+                {
+                    nItem.Text = sb.ToString();
+                }
                 nItem.Tag = hWnd;
                 FormMenu.Items.Add(nItem);
             }
@@ -103,56 +117,22 @@ namespace WindowsReplica
         #region 更新thumbnail屬性
         public void UpdateThumb()
         {
-            LeftAndTop = 1;
-            RightAndBottom = -1;
             if (Thumb != IntPtr.Zero)
             {
                 Struct.DWM_THUMBNAIL_PROPERTIES props = new Struct.DWM_THUMBNAIL_PROPERTIES
                 {
                     dwFlags = (uint)(Enum.DWM.DWM_TNP_RECTDESTINATION | Enum.DWM.DWM_TNP_OPACITY | Enum.DWM.DWM_TNP_VISIBLE | Enum.DWM.DWM_TNP_SOURCECLIENTAREAONLY),
-                    rcDestination = new Struct.ThumbRect(LeftAndTop, LeftAndTop, this.Width + RightAndBottom, this.Height + RightAndBottom),
+                    rcDestination = new Struct.ThumbRect(FormMargins, FormMargins, currentDwmWidth, currentDwmHeight),
                     opacity = 255,
                     fVisible = true,
                     fSourceClientAreaOnly = false
                 };
                 Dll_Import.DwmUpdateThumbnailProperties(Thumb, ref props);
-                NFormHeight = this.Height;
-                NFormWidth = this.Width;
             }
         }
         #endregion
 
-        #region 改變視窗大小
-        //WndProc
-        protected override void WndProc(ref Message m)
-        {
-            if (ResizeForm)
-            {
-                if (m.Msg == (int)Enum.WM.WM_SIZING)
-                {
-                    Struct.RECT rc = (Struct.RECT)Marshal.PtrToStructure(m.LParam, typeof(Struct.RECT));
-                    switch (m.WParam.ToInt32()) // Resize handle
-                    {
-                        case (int)Enum.WMSZ.WMSZ_LEFT:
-                        case (int)Enum.WMSZ.WMSZ_RIGHT:
-                            // Left or right handles, adjust height                        
-                            rc.Bottom = rc.Top + (int)(OItemHeight * NFormWidth / OItemWidth);
-                            UpdateThumb();
-                            break;
-
-                        case (int)Enum.WMSZ.WMSZ_TOP:
-                        case (int)Enum.WMSZ.WMSZ_BOTTOM:
-                            // Top or bottom handles, adjust width
-                            rc.Right = rc.Left + (int)(OItemWidth * NFormHeight / OItemHeight);
-                            UpdateThumb();
-                            break;
-                    }
-                    Marshal.StructureToPtr(rc, m.LParam, true);
-                }
-            }
-            base.WndProc(ref m);
-        }
-
+        #region 視窗控制
         const int _ = 5; //邊距
         Rectangle RectangleCentre { get { return new Rectangle(_, _, this.ClientSize.Width - _ - _, this.ClientSize.Height - _ - _); } }
         Rectangle RectangleTop { get { return new Rectangle(0, 0, this.ClientSize.Width, _); } }
@@ -188,6 +168,33 @@ namespace WindowsReplica
             else
             {
                 this.Cursor = Cursors.Default;
+            }
+        }
+
+        //事件_改變視窗大小
+        private void WindowsReplica_Resize(object sender, EventArgs e)
+        {
+            if (ResizeForm)
+            {
+                if (this.Cursor == Cursors.SizeWE)
+                {
+                    float tempHeight = initialDwmHeight * ((float)(this.Width - FormMargins) / initialDwmWidth);
+                    float tempWidth = this.Width - FormMargins;
+                    currentDwmHeight = (int)tempHeight;
+                    currentDwmWidth = (int)tempWidth;
+                    this.Height = currentDwmHeight + FormMargins;
+                    UpdateThumb();
+                }
+
+                if (this.Cursor == Cursors.SizeNS)
+                {
+                    float tempWidth = initialDwmWidth * ((float)(this.Height - FormMargins) / initialDwmHeight);
+                    float tempHeight = this.Height - FormMargins;
+                    currentDwmHeight = (int)tempHeight;
+                    currentDwmWidth = (int)tempWidth;
+                    this.Width = currentDwmWidth + FormMargins;
+                    UpdateThumb();
+                }
             }
         }
         #endregion
@@ -279,7 +286,7 @@ namespace WindowsReplica
                 Reset();
                 GC.Collect();
             }
-            else
+            else if (e.ClickedItem.Tag != null)
             {
                 Reset();
                 IntPtr ItemhWnd = (IntPtr)e.ClickedItem.Tag;
@@ -288,11 +295,13 @@ namespace WindowsReplica
                 {
                     this.BackColor = Ncolor;
                     Dll_Import.DwmQueryThumbnailSourceSize(Thumb, out Struct.ThumbSize CheckItemSize);
-                    OItemWidth = CheckItemSize.x;
-                    OItemHeight = CheckItemSize.y;
-                    this.MinimumSize = new Size((int)(OItemWidth * 0.1), (int)(OItemHeight * 0.1));
-                    this.MaximumSize = new Size(OItemWidth, OItemHeight);
-                    this.Size = new Size((int)(OItemWidth * 0.4), (int)(OItemHeight * 0.4));
+                    initialDwmWidth = CheckItemSize.x;
+                    initialDwmHeight = CheckItemSize.y;
+                    this.MinimumSize = new Size((int)(initialDwmWidth * 0.1) + FormMargins * 2, (int)(initialDwmHeight * 0.1) + FormMargins * 2);
+                    this.MaximumSize = new Size(initialDwmWidth + FormMargins * 2, initialDwmHeight + FormMargins * 2);
+                    this.Size = new Size((int)(initialDwmWidth * 0.4) + FormMargins * 2, (int)(initialDwmHeight * 0.4) + FormMargins * 2);
+                    currentDwmWidth = this.Width - FormMargins;
+                    currentDwmHeight = this.Height - FormMargins;
                     UpdateThumb();
                     ResizeForm = true;
                 }
@@ -301,6 +310,10 @@ namespace WindowsReplica
                     this.BackColor = Dcolor;
                     Reset();
                 }
+                GC.Collect();
+            }
+            else
+            {
                 GC.Collect();
             }
         }

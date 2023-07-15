@@ -62,7 +62,7 @@ namespace WindowsReplica
         public static extern int DwmUpdateThumbnailProperties(IntPtr hThumb, ref Struct.DWM_THUMBNAIL_PROPERTIES props);
 
         [DllImport("dwmapi.dll")]
-        public static extern int DwmGetWindowAttribute(IntPtr hWnd, Enum.DWMWINDOWATTRIBUTE dwAttribute, out bool pvAttribute, int cbAttribute);
+        public static extern int DwmGetWindowAttribute(IntPtr hWnd, Enum.DWMWINDOWATTRIBUTE dwAttribute, out int pvAttribute, int cbAttribute);
         #endregion
     }
 }
