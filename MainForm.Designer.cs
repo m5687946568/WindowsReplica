@@ -166,7 +166,6 @@ namespace WindowsReplica
             this.TopMost = true;
             this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.WindowsReplica_MouseDown);
             this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.WindowsReplica_MouseMove);
-            this.Resize += new System.EventHandler(this.WindowsReplica_Resize);
             this.NotifyIconMenu.ResumeLayout(false);
             this.FormMenu.ResumeLayout(false);
             this.ResumeLayout(false);

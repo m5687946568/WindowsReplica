@@ -171,31 +171,43 @@ namespace WindowsReplica
             }
         }
 
-        //事件_改變視窗大小
-        private void WindowsReplica_Resize(object sender, EventArgs e)
+        //改變視窗大小
+        protected override void WndProc(ref Message m)
         {
             if (ResizeForm)
             {
-                if (this.Cursor == Cursors.SizeWE)
+                if (m.Msg == (int)Enum.WM.WM_SIZING)
                 {
-                    float tempHeight = initialDwmHeight * ((float)(this.Width - FormMargins) / initialDwmWidth);
-                    float tempWidth = this.Width - FormMargins;
-                    currentDwmHeight = (int)tempHeight;
-                    currentDwmWidth = (int)tempWidth;
-                    this.Height = currentDwmHeight + FormMargins;
-                    UpdateThumb();
-                }
+                    Struct.RECT rc = (Struct.RECT)Marshal.PtrToStructure(m.LParam, typeof(Struct.RECT));
+                    float tempWidth, tempHeight;
+                    switch (m.WParam.ToInt32()) // Resize handle
+                    {
+                        case (int)Enum.WMSZ.WMSZ_LEFT:
+                        case (int)Enum.WMSZ.WMSZ_RIGHT:
+                            // Left or right handles, adjust height                        
+                            tempHeight = initialDwmHeight * ((float)(this.Width - FormMargins) / initialDwmWidth);
+                            tempWidth = this.Width - FormMargins;
+                            currentDwmHeight = (int)tempHeight;
+                            currentDwmWidth = (int)tempWidth;
+                            rc.Bottom = rc.Top + currentDwmHeight + FormMargins;
+                            UpdateThumb();
+                            break;
 
-                if (this.Cursor == Cursors.SizeNS)
-                {
-                    float tempWidth = initialDwmWidth * ((float)(this.Height - FormMargins) / initialDwmHeight);
-                    float tempHeight = this.Height - FormMargins;
-                    currentDwmHeight = (int)tempHeight;
-                    currentDwmWidth = (int)tempWidth;
-                    this.Width = currentDwmWidth + FormMargins;
-                    UpdateThumb();
+                        case (int)Enum.WMSZ.WMSZ_TOP:
+                        case (int)Enum.WMSZ.WMSZ_BOTTOM:
+                            // Top or bottom handles, adjust width
+                            tempWidth = initialDwmWidth * ((float)(this.Height - FormMargins) / initialDwmHeight);
+                            tempHeight = this.Height - FormMargins;
+                            currentDwmHeight = (int)tempHeight;
+                            currentDwmWidth = (int)tempWidth;
+                            rc.Right = rc.Left + currentDwmWidth + FormMargins;
+                            UpdateThumb();
+                            break;
+                    }
+                    Marshal.StructureToPtr(rc, m.LParam, true);
                 }
             }
+            base.WndProc(ref m);
         }
         #endregion
 
